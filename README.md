@@ -1,12 +1,10 @@
 # Pipeline Guard
 
-### Passive OT Monitoring and Process-Aware Risk Assessment using GRFICSv3
+Passive OT Monitoring and Process-Aware Risk Assessment using GRFICSv3
 
-Pipeline Guard is a research-oriented Operational Technology (OT) cybersecurity project focused on studying and implementing the core concepts behind modern industrial monitoring platforms.
+Pipeline Guard is a research-oriented Operational Technology (OT) cybersecurity project focused on studying and implementing the core concepts behind modern industrial monitoring platforms — built during an OT Security internship at OilSERV.
 
-The project utilizes the GRFICSv3 industrial control system testbed to simulate a realistic oil pipeline environment and serve as a foundation for developing a passive monitoring solution capable of asset discovery, process-state awareness, and process-aware risk assessment.
-
----
+The project uses the GRFICSv3 industrial control system testbed to simulate a realistic oil pipeline environment, with a two-laptop lab passively mirroring ICS traffic, parsing Modbus TCP, and generating process-aware alerts forwarded to Azure.
 
 ## Project Motivation
 
@@ -14,121 +12,95 @@ Industrial environments differ significantly from traditional IT networks becaus
 
 Modern OT security platforms provide visibility into industrial assets, communications, and operational risks. Understanding how these systems function requires knowledge of industrial protocols, network monitoring, process behavior, and engineering-driven risk assessment.
 
-Pipeline Guard was created as a practical research project to explore these concepts in a realistic environment and better understand the workflow behind process-aware industrial monitoring systems.
+Pipeline Guard was created as a practical research project to explore these concepts in a realistic environment and better understand the workflow behind process-aware industrial monitoring systems. It is not intended to replace commercial OT security products — it's a research, learning, and implementation exercise.
 
-> The project is not intended to replace commercial OT security products. Instead, it serves as a research, learning, and implementation exercise focused on understanding how industrial monitoring platforms operate within real-world control environments.
+## Architecture
 
----
-## Architecture Overview
-<img width="453" height="654" alt="Purdue model for our Project" src="https://github.com/user-attachments/assets/d4d7589e-1093-47db-af3d-3ed8ac762f95" />
+Two physical laptops connected via crossover Ethernet, isolating the OT lab from the daily-driver network:
 
----
-
-## Project Objectives
-
-| Objective                  | Description                                         |
-| -------------------------- | --------------------------------------------------- |
-| Industrial Control Systems | Study ICS and OT architectures                      |
-| Network Monitoring         | Analyze industrial communications                   |
-| Asset Discovery            | Explore passive identification of industrial assets |
-| Process Awareness          | Understand process-state monitoring concepts        |
-| Risk Assessment            | Investigate engineering-rule-based detection        |
-| Practical Experience       | Gain hands-on OT cybersecurity experience           |
-
----
-
-## Current Architecture
-
-```text
-Laptop A
-│
-├── Windows 11
-│
-└── Ubuntu Virtual Machine
-    │
-    └── GRFICSv3
-        ├── PLC
-        ├── HMI
-        ├── Engineering Workstation
-        ├── Router
-        ├── Industrial Network
-        └── Process Simulation
-
-Laptop B
-│
-└── Pipeline Guard (Planned)
+```
+ASUS "witcher" (192.168.10.1)  <──crossover Ethernet──>  Dell "beast" (192.168.10.2)
+                                                                  │
+                                                          Ubuntu VM (vboxuser@192.168.29.83)
+                                                                  │
+                                                          GRFICSv3 (7 Docker containers)
+                                                          ├── PLC
+                                                          ├── HMI
+                                                          ├── Engineering Workstation
+                                                          ├── Router
+                                                          ├── Process Simulation
+                                                          └── 6x Remote IO Modbus servers
+                                                              (192.168.95.10–15)
+                                                                  │
+                                                          ICS Network (192.168.95.0/24)
 ```
 
-*Architecture diagram will be added as the project progresses.*
+**Traffic mirroring:** `tcpdump` piped over SSH from the Ubuntu VM — fully passive, no active Modbus polling (no PyModbus).
 
----
+**Modbus register map (GRFICSv3):**
+| Register | Meaning |
+|---|---|
+| IR 108 | Reactor pressure |
+| HR 100–103 | PLC output words |
+| HR 1024–1028 | Sticky setpoints |
+
+**Alerting:** Process-aware rules (R001–R004) grounded in IEC 62443, NERC CIP, and NIST SP 800-82, forwarding alerts to an Azure Logic App with Blob Storage as the alert store (replacing a traditional historian).
 
 ## Project Status
 
-### Completed
+### ✅ Completed
+- GitHub repository initialization
+- Ubuntu VM deployment, Docker install/validation
+- GRFICSv3 deployment — all 7 containers healthy
+- Crossover Ethernet setup between ASUS (witcher) and Dell (beast)
+- Full SSH jump chain verified to Ubuntu VM
+- Live Modbus TCP traffic confirmed via `tcpdump` on the ICS network
+- GRFICSv3 Modbus register map identified
+- Alert rule design (R001–R004) mapped to IEC 62443 / NERC CIP / NIST SP 800-82
 
-| Status | Task                                      |
-| ------ | ----------------------------------------- |
-| ✅      | GitHub repository initialization          |
-| ✅      | Ubuntu virtual machine deployment         |
-| ✅      | Docker installation and validation        |
-| ✅      | GRFICSv3 deployment                       |
-| ✅      | Network configuration and troubleshooting |
-| ✅      | Environment validation                    |
-| ✅      | Initial project architecture design       |
+### 🔄 In Progress
+- Reading *Practical Industrial Cybersecurity* (Brooks & Craig) for process-monitoring grounding
+- Writing `pipeline_guard.py` (pyshark/tshark-based passive parser, running on the Ubuntu VM)
 
-### In Progress
-
-| Status | Task                                    |
-| ------ | --------------------------------------- |
-| 🔄     | GRFICSv3 architecture analysis          |
-| 🔄     | Industrial network mapping              |
-| 🔄     | Process understanding and documentation |
-| 🔄     | Monitoring platform design              |
-
-### Planned
-
-| Status | Task                           |
-| ------ | ------------------------------ |
-| ⏳      | Passive asset discovery module |
-| ⏳      | Process-state tracking module  |
-| ⏳      | Risk assessment engine         |
-| ⏳      | Alert generation framework     |
-| ⏳      | Azure integration              |
-| ⏳      | Testing and validation         |
-
----
+### ⏳ Planned
+- Process-state tracking module
+- Risk assessment / alert generation engine (R001–R004 implementation)
+- Azure Logic App + Blob Storage integration
+- Testing and validation
+- Final documentation
 
 ## Development Roadmap
 
-| Phase                          | Status         |
-| ------------------------------ | -------------- |
-| Environment Setup & Deployment | ✅ Completed    |
-| Architecture Analysis          | 🔄 In Progress |
-| Asset Discovery Design         | ⏳ Planned      |
-| Process-State Tracking Design  | ⏳ Planned      |
-| Risk Assessment Engine         | ⏳ Planned      |
-| Alert Generation               | ⏳ Planned      |
-| Azure Integration              | ⏳ Planned      |
-| Testing & Validation           | ⏳ Planned      |
-| Final Documentation            | ⏳ Planned      |
-
----
+| Phase | Status |
+|---|---|
+| Environment Setup & Deployment | ✅ Completed |
+| Network & SSH Chain Verification | ✅ Completed |
+| Traffic Mirroring (tcpdump over SSH) | ✅ Completed |
+| Register Map & Alert Rule Design | ✅ Completed |
+| `pipeline_guard.py` (pyshark/tshark parser) | 🔄 In Progress |
+| Process-State Tracking | ⏳ Planned |
+| Risk Assessment / Alert Engine | ⏳ Planned |
+| Azure Integration | ⏳ Planned |
+| Testing & Validation | ⏳ Planned |
+| Final Documentation | ⏳ Planned |
 
 ## Current Environment
 
-| Category         | Technology        |
-| ---------------- | ----------------- |
-| Virtualization   | Oracle VirtualBox |
-| Operating System | Ubuntu Linux      |
-| Containerization | Docker            |
-| OT Testbed       | GRFICSv3          |
-
----
+| Category | Technology |
+|---|---|
+| Virtualization | Oracle VirtualBox |
+| Operating System | Ubuntu Linux (VM), Windows 11 (host laptops) |
+| Containerization | Docker |
+| OT Testbed | GRFICSv3 |
+| Lab Network | Crossover Ethernet, 192.168.10.0/24 |
+| ICS Network | 192.168.95.0/24 |
+| Traffic Capture | tcpdump over SSH → pyshark/tshark |
+| Alert Forwarding | Azure Logic App |
+| Alert Storage | Azure Blob Storage |
 
 ## Repository Structure
 
-```text
+```
 pipeline-guard/
 │
 ├── README.md
@@ -140,32 +112,21 @@ pipeline-guard/
 └── src/
 ```
 
----
-
 ## Learning Goals
 
-Through this project, the following areas are being explored:
-
-* Operational Technology (OT) Security
-* Industrial Control Systems (ICS)
-* Industrial Network Monitoring
-* Process-Aware Security Concepts
-* Risk Assessment Methodologies
-* Industrial Cybersecurity Research
-* Dockerized OT Environments
-
----
+- Operational Technology (OT) Security
+- Industrial Control Systems (ICS)
+- Industrial Network Monitoring
+- Process-Aware Security Concepts
+- Risk Assessment Methodologies (IEC 62443 / NERC CIP / NIST SP 800-82)
+- Industrial Cybersecurity Research
+- Dockerized OT Environments
+- Cloud Integration for OT Alerting (Azure)
 
 ## Author
 
 **Abhineet Tandon**
+B.Tech Computer Science and Engineering (Cybersecurity), UPES Dehradun
+OT Security Intern, OilSERV
 
-B.Tech Computer Science and Engineering
-UPES Dehradun
-
-**Research Interests**
-
-* OT Security
-* Industrial Cybersecurity
-* Network Monitoring
-* Process-Aware Detection
+Research Interests: OT Security · Industrial Cybersecurity · Network Monitoring · Process-Aware Detection
