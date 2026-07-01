@@ -2,7 +2,7 @@
 
 Passive OT Monitoring and Process-Aware Risk Assessment using GRFICSv3
 
-Pipeline Guard is a research-oriented Operational Technology (OT) cybersecurity project focused on studying and implementing the core concepts behind modern industrial monitoring platforms.
+GridWatch is a research-oriented Operational Technology (OT) cybersecurity project focused on studying and implementing the core concepts behind modern industrial monitoring platforms.
 
 The project uses the GRFICSv3 industrial control system testbed to simulate a realistic oil pipeline environment, with a two-laptop lab passively mirroring ICS traffic, parsing Modbus TCP, and generating process-aware alerts forwarded to Azure.
 
@@ -12,7 +12,7 @@ Industrial environments differ significantly from traditional IT networks becaus
 
 Modern OT security platforms provide visibility into industrial assets, communications, and operational risks. Understanding how these systems function requires knowledge of industrial protocols, network monitoring, process behavior, and engineering-driven risk assessment.
 
-Pipeline Guard was created as a practical research project to explore these concepts in a realistic environment and better understand the workflow behind process-aware industrial monitoring systems. It is not intended to replace commercial OT security products — it's a research, learning, and implementation exercise.
+GridWatch was created as a practical research project to explore these concepts in a realistic environment and better understand the workflow behind process-aware industrial monitoring systems. It is not intended to replace commercial OT security products — it's a research, learning, and implementation exercise.
 
 ## Architecture
 
@@ -60,7 +60,7 @@ Laptop A (192.168.10.1)    <──crossover Ethernet──>      Laptop B (192.1
 
 ### 🔄 In Progress
 - Reading *Practical Industrial Cybersecurity* (Brooks & Craig) for process-monitoring grounding
-- Writing `pipeline_guard.py` (pyshark/tshark-based passive parser, running on the Ubuntu VM)
+- Writing `gridwatch.py` (pyshark/tshark-based passive parser, running on the Ubuntu VM)
 
 ### ⏳ Planned
 - Process-state tracking module
@@ -77,7 +77,7 @@ Laptop A (192.168.10.1)    <──crossover Ethernet──>      Laptop B (192.1
 | Network & SSH Chain Verification | ✅ Completed |
 | Traffic Mirroring (tcpdump over SSH) | ✅ Completed |
 | Register Map & Alert Rule Design | ✅ Completed |
-| `pipeline_guard.py` (pyshark/tshark parser) | 🔄 In Progress |
+| `gridwatch.py` (pyshark/tshark parser) | 🔄 In Progress |
 | Process-State Tracking | ⏳ Planned |
 | Risk Assessment / Alert Engine | ⏳ Planned |
 | Azure Integration | ⏳ Planned |
@@ -101,7 +101,7 @@ Laptop A (192.168.10.1)    <──crossover Ethernet──>      Laptop B (192.1
 ## Repository Structure
 
 ```
-pipeline-guard/
+gridwatch/
 │
 ├── README.md
 ├── docs/
